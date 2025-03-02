@@ -18,7 +18,7 @@ A dynamic, customizable lightning text effect component that brings your text to
 ```html
 <head>
   <!-- Include component -->
-  <script src="[https://cdn.jsdelivr.net/gh/yourusername/thunder-text-effect@main/thunder-text.html](https://cdn.jsdelivr.net/gh/alikhanima/Ra-Fonts-For-Web-Designing-@main/thunder-text.html)"></script>
+  <script src="(https://cdn.jsdelivr.net/gh/alikhanima/Ra-Fonts-For-Web-Designing-@main/thunder-text.html)"></script>
   
   <!-- Required GSAP dependencies -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
