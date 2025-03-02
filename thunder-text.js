@@ -9,15 +9,18 @@ class ThunderText {
         this.config = {
             color: this.element.dataset.color || '#00f7ff', // Default color for text
             intensity: parseFloat(this.element.dataset.intensity) || 1,
-            glowIntensity: parseFloat(this.element.dataset.glowIntensity) || 1,
-            shadowBlur: this.element.dataset.shadowBlur || '30px',
-            particleSize: this.element.dataset.particleSize || '3px',
+            glowIntensity: parseFloat(this.element.dataset.glowIntensity) || 2, // Increased glow intensity
+            shadowBlur: this.element.dataset.shadowBlur || '50px', // Increased blur for better glow effect
+            particleSize: this.element.dataset.particleSize || '6px',
             animationSpeed: parseFloat(this.element.dataset.animationSpeed) || 0.5,
             interval: 2000
         };
 
         // Apply the color directly to the text
         this.element.style.color = this.config.color;
+
+        // Apply the neon glow effect to text using text-shadow
+        this.element.style.textShadow = `0 0 ${this.config.shadowBlur} rgba(0, 247, 255, ${this.config.glowIntensity}), 0 0 ${parseInt(this.config.shadowBlur) * 0.8}px rgba(0, 247, 255, ${this.config.glowIntensity * 0.7})`;
 
         this.element.style.setProperty('--thunder-color', this.config.color);
         this.element.style.setProperty('--glow-intensity', this.config.glowIntensity);
