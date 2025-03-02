@@ -18,22 +18,11 @@ A dynamic, customizable lightning text effect component that brings your text to
 ```html
 <head>
   <!-- Include component -->
-  <script src="(https://cdn.jsdelivr.net/gh/alikhanima/Ra-Fonts-For-Web-Designing-@main/thunder-text.html)"></script>
+   src="(https://cdn.jsdelivr.net/gh/alikhanima/Ra-Fonts-For-Web-Designing-@refs/heads/main/thunder-text.js)"></script>
   
   <!-- Required GSAP dependencies -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Physics2DPlugin.min.js"></script>
 </head>
 
-<body>
-  <!-- Basic implementation -->
-  <div class="thunder-text">LIGHTNING</div>
-
-  <!-- Customized example -->
-  <div class="thunder-text" 
-       data-color="#ff00ff"
-       data-intensity="2.5"
-       data-interval="1500">
-    THUNDER
-  </div>
-</body>
+i will make alot of changes once i have Time for it for Now it  adds a glow under the text 
