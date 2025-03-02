@@ -7,7 +7,7 @@ class ThunderText {
 
     init() {
         this.config = {
-            color: this.element.dataset.color || '#00f7ff',
+            color: this.element.dataset.color || '#00f7ff', // Default color for text
             intensity: parseFloat(this.element.dataset.intensity) || 1,
             glowIntensity: parseFloat(this.element.dataset.glowIntensity) || 1,
             shadowBlur: this.element.dataset.shadowBlur || '30px',
@@ -15,6 +15,9 @@ class ThunderText {
             animationSpeed: parseFloat(this.element.dataset.animationSpeed) || 0.5,
             interval: 2000
         };
+
+        // Apply the color directly to the text
+        this.element.style.color = this.config.color;
 
         this.element.style.setProperty('--thunder-color', this.config.color);
         this.element.style.setProperty('--glow-intensity', this.config.glowIntensity);
