@@ -1,71 +1,62 @@
-// thunder-text.js
 class ThunderText {
     constructor(element, options = {}) {
         this.element = element;
-        this.options = Object.assign({
-            color: "white",
-            intensity: 30,
-            flashOpacity: 0.9,
-            interval: 3000,
-            repeat: 3
-        }, options);
+        this.options = {
+            color: options.color || 'white',
+            intensity: options.intensity || 50,
+            flashOpacity: options.flashOpacity || 0.9,
+            interval: options.interval || 3000,
+            repeat: options.repeat || 3
+        };
         
-        this.flash = document.createElement("div");
-        this.flash.classList.add("thunder-flash");
-        this.element.parentElement.appendChild(this.flash);
-        this.initStyles();
-        this.bindEvents();
+        this.initEffect();
     }
 
-    initStyles() {
-        this.element.style.position = "relative";
-        this.element.style.fontWeight = "bold";
-        this.element.style.textTransform = "uppercase";
-        this.element.style.color = this.options.color;
-        this.flash.style.position = "absolute";
-        this.flash.style.top = "50%";
-        this.flash.style.left = "50%";
-        this.flash.style.width = "100%";
-        this.flash.style.height = "100%";
-        this.flash.style.background = `rgba(255, 255, 255, ${this.options.flashOpacity})`;
-        this.flash.style.opacity = "0";
-        this.flash.style.transform = "translate(-50%, -50%)";
-    }
+    initEffect() {
+        const el = this.element;
+        const options = this.options;
 
-    bindEvents() {
-        if (this.options.interval > 0) {
-            setInterval(() => this.triggerEffect(), this.options.interval);
-        }
-        this.element.addEventListener("mouseenter", () => this.triggerEffect());
-    }
+        const lightningEffect = () => {
+            const tl = gsap.timeline({ repeat: options.repeat, repeatDelay: Math.random() * 0.2 });
+            
+            tl.to(el, { 
+                textShadow: `0 0 ${options.intensity}px ${options.color}, 0 0 ${options.intensity * 2}px ${options.color}`,
+                color: options.color,
+                duration: 0.05,
+                ease: "power2.out"
+            })
+            .to(el, { 
+                textShadow: "none", 
+                color: "", 
+                duration: 0.1,
+                ease: "power2.in"
+            })
+            .to(el, { 
+                textShadow: `0 0 ${options.intensity * 1.5}px ${options.color}, 0 0 ${options.intensity * 2.5}px ${options.color}`,
+                color: options.color,
+                duration: 0.05
+            })
+            .to(el, { 
+                textShadow: "none", 
+                color: "", 
+                duration: 0.1
+            });
+        };
 
-    triggerEffect() {
-        gsap.to(this.flash, {
-            opacity: 1,
-            duration: 0.1,
-            repeat: this.options.repeat,
-            yoyo: true,
-            onComplete: () => gsap.to(this.flash, { opacity: 0, duration: 0.1 })
-        });
-        gsap.to(this.element, {
-            textShadow: `0 0 ${this.options.intensity}px rgba(255, 255, 255, 0.8)`,
-            duration: 0.1,
-            repeat: this.options.repeat,
-            yoyo: true
-        });
+        setInterval(lightningEffect, options.interval);
+        lightningEffect(); // Start immediately
     }
 }
 
-// Automatically apply effect to elements with class "thunder-text"
+// Initialize for all elements with class 'thunder-text'
 document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(".thunder-text").forEach(el => {
-        const options = {
+        new ThunderText(el, {
             color: el.getAttribute("data-color") || "white",
-            intensity: parseInt(el.getAttribute("data-intensity")) || 30,
+            intensity: parseInt(el.getAttribute("data-intensity")) || 50,
             flashOpacity: parseFloat(el.getAttribute("data-flash-opacity")) || 0.9,
             interval: parseInt(el.getAttribute("data-interval")) || 3000,
             repeat: parseInt(el.getAttribute("data-repeat")) || 3
-        };
-        new ThunderText(el, options);
+        });
     });
 });
