@@ -1,58 +1,50 @@
-(function() {
-  class ThreeDText extends HTMLElement {
-    constructor() {
-      super();
-      this.attachShadow({ mode: 'open' });
-      this.shadowRoot.innerHTML = `
-        <style>
-          :host {
-            display: inline-block;
-            perspective: 500px;
-            transform-style: preserve-3d;
-          }
-
-          .text {
-            position: relative;
-            transform-style: preserve-3d;
-            font-size: inherit;
-            font-weight: inherit;
-            color: inherit;
-            text-transform: inherit;
-          }
-
-          .front {
-            transform: translateZ(5px);
-          }
-
-          .back {
-            transform: translateZ(-5px);
-            color: rgba(0, 0, 0, 0.5);
-          }
-
-          .front, .back {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            white-space: nowrap;
-          }
-        </style>
-        <div class="text">
-          <div class="front"></div>
-          <div class="back"></div>
-        </div>
-      `;
-    }
-
-    connectedCallback() {
-      const textContent = this.textContent;
-      this.shadowRoot.querySelector('.front').textContent = textContent;
-      this.shadowRoot.querySelector('.back').textContent = textContent;
-      this.textContent = ''; // Clear original text
+{
+  "effects": {
+    "tag_3d": {
+      "font": "Arial Black",
+      "size": 48,
+      "color": "#FF5733",
+      "shadow": {
+        "offset_x": 5,
+        "offset_y": 5,
+        "blur": 10,
+        "color": "#000000"
+      },
+      "outline": {
+        "width": 2,
+        "color": "#FFFFFF"
+      },
+      "transform": {
+        "perspective": 500,
+        "rotateX": 30,
+        "rotateY": 10,
+        "rotateZ": 0
+      }
+    },
+    "neon_glow": {
+      "font": "Verdana",
+      "size": 40,
+      "color": "#00FFFF",
+      "glow": {
+        "strength": 15,
+        "color": "#00FFFF"
+      }
+    },
+    "embossed": {
+      "font": "Times New Roman",
+      "size": 42,
+      "color": "#CCCCCC",
+      "depth": 5,
+      "light_direction": "top-left"
+    },
+    "gradient_fill": {
+      "font": "Tahoma",
+      "size": 45,
+      "gradient": {
+        "start_color": "#FF0000",
+        "end_color": "#0000FF",
+        "angle": 45
+      }
     }
   }
-
-  customElements.define('3d', ThreeDText);
-})();
+        }
