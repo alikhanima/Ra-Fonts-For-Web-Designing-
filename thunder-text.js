@@ -1,44 +1,48 @@
-// thunder-text.js
-function applyGlowEffect() {
-    // Select all elements with the 'data-glow' attribute
-    const glowingElements = document.querySelectorAll('[data-glow]');
-    
-    glowingElements.forEach(element => {
-        // Get custom attributes or use defaults
-        const glowColor = element.getAttribute('data-glow-color') || '#00ff00';
-        const glowIntensity = element.getAttribute('data-glow-intensity') || '10';
-        const glowSpread = element.getAttribute('data-glow-spread') || '3';
-        const textColor = element.getAttribute('data-glow-text-color') || '#ffffff';
-        const animation = element.getAttribute('data-glow-animation') || 'none';
+document.addEventListener("DOMContentLoaded", () => {
+  const elements = document.querySelectorAll('[text-effect="glow"]');
+  elements.forEach(el => {
+    // Get base text and glow colors
+    const baseColor = el.getAttribute('color') || 'white';
+    const glowColor = el.getAttribute('glow') || baseColor;
+    const enableColorChange = el.hasAttribute('colorchange') || el.hasAttribute('glow-colors');
 
-        // Apply base styles
-        element.style.color = textColor;
-        element.style.display = 'inline-block';
-        
-        // Create realistic glow effect with multiple shadows
-        const shadows = [];
-        for (let i = 0; i < glowSpread; i++) {
-            const radius = (glowIntensity * 1) + (i * glowIntensity / 2);
-            shadows.push(`0 0 ${radius}px ${glowColor}`);
-        }
-        
-        // Apply the glow effect
-        element.style.textShadow = shadows.join(', ');
+    // Function to apply an ultra high quality glow using multiple layered text shadows.
+    const setGlow = (color) => {
+      el.style.textShadow = `
+        0 0 2px ${color},
+        0 0 4px ${color},
+        0 0 8px ${color},
+        0 0 16px ${color},
+        0 0 32px ${color}
+      `;
+    };
 
-        // Add animation if specified
-        if (animation === 'pulse') {
-            let intensity = glowIntensity;
-            const animate = () => {
-                intensity = glowIntensity + (Math.sin(Date.now() / 300) * glowIntensity);
-                element.style.textShadow = shadows
-                    .map(sh => sh.replace(/\d+px/, `${intensity}px`))
-                    .join(', ');
-                requestAnimationFrame(animate);
-            };
-            animate();
-        }
-    });
-}
+    // Set the text color and initial glow
+    el.style.color = baseColor;
+    setGlow(glowColor);
 
-// Initialize the glow effect when the DOM is fully loaded
-document.addEventListener('DOMContentLoaded', applyGlowEffect);
+    // If color-changing is enabled, animate the glow color
+    if (enableColorChange && typeof gsap !== "undefined") {
+      let colors = [];
+      if (el.hasAttribute('glow-colors')) {
+        // Expect comma-separated list of colors
+        colors = el.getAttribute('glow-colors').split(',').map(c => c.trim());
+      }
+      // Fallback cycle if no glow-colors attribute is provided
+      if (colors.length === 0) {
+        colors = [glowColor, 'red', 'blue', 'green', 'purple'];
+      }
+      // Create a GSAP timeline that cycles through the colors
+      const tl = gsap.timeline({ repeat: -1, yoyo: true });
+      colors.forEach(color => {
+        tl.to(el, {
+          duration: 1.5,
+          onUpdate: () => {
+            setGlow(color);
+          },
+          ease: "none"
+        });
+      });
+    }
+  });
+});
