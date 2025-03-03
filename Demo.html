@@ -1,53 +1,101 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thunder Text Effect Demo</title>
-    
-    <style>
-        body {
-            background-color: black;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            text-align: center;
-            font-family: Arial, sans-serif;
+class ThunderText {
+    constructor(element, options = {}) {
+        this.element = element;
+        this.options = {
+            color: options.color || 'aqua',
+            intensity: options.intensity || 50,
+            flashOpacity: options.flashOpacity || 0.9,
+            interval: options.interval || 3000,
+            repeat: options.repeat || 3
+        };
+        
+        this.initEffect();
+    }
+
+    initEffect() {
+        const el = this.element;
+        const options = this.options;
+        el.style.position = "relative";
+        el.style.transition = "color 0.1s ease-in-out";
+        el.style.textShadow = `0 0 ${options.intensity}px ${options.color}, 0 0 ${options.intensity * 2}px ${options.color}`;
+        el.style.animation = "flicker 2s infinite";
+
+        // Create canvas for electric sparks
+        const canvas = document.createElement("canvas");
+        canvas.style.position = "absolute";
+        canvas.style.top = "0";
+        canvas.style.left = "0";
+        canvas.style.width = "100%";
+        canvas.style.height = "100%";
+        canvas.style.pointerEvents = "none";
+        el.appendChild(canvas);
+        this.canvas = canvas;
+        this.ctx = canvas.getContext("2d");
+        
+        window.addEventListener("resize", () => this.updateCanvasSize());
+        this.updateCanvasSize();
+        this.startLightningEffect();
+    }
+
+    updateCanvasSize() {
+        this.canvas.width = this.element.offsetWidth;
+        this.canvas.height = this.element.offsetHeight;
+    }
+
+    drawLightning() {
+        const ctx = this.ctx;
+        ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        const x = Math.random() * this.canvas.width;
+        const y = 0;
+        ctx.strokeStyle = this.options.color;
+        ctx.lineWidth = Math.random() * 2 + 1;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        for (let i = 0; i < 5; i++) {
+            const dx = x + (Math.random() - 0.5) * 20;
+            const dy = y + (Math.random() * this.canvas.height);
+            ctx.lineTo(dx, dy);
         }
-    </style>
-</head>
-<body>
-    <h1 class="thunder-text" data-color="yellow" data-intensity="50" data-flash-opacity="0.8" data-interval="5000" data-repeat="5">
-        LIGHTNING EFFECT
-    </h1>
-    <h2 class="thunder-text" data-color="cyan" data-intensity="40" data-flash-opacity="0.7" data-interval="4000" data-repeat="4">
-        THUNDER POWER
-    </h2>
-    
-    <!-- Required GSAP dependencies -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Physics2DPlugin.min.js"></script>
-    
-    <!-- Include Thunder Text Component -->
-    <script src="https://cdn.jsdelivr.net/gh/alikhanima/Ra-Fonts-For-Web-Designing-@refs/heads/main/thunder-text.js"></script>
-    
-    <!-- Ensure script runs after DOM load -->
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            document.querySelectorAll(".thunder-text").forEach(el => {
-                const options = {
-                    color: el.getAttribute("data-color") || "white",
-                    intensity: parseInt(el.getAttribute("data-intensity")) || 30,
-                    flashOpacity: parseFloat(el.getAttribute("data-flash-opacity")) || 0.9,
-                    interval: parseInt(el.getAttribute("data-interval")) || 3000,
-                    repeat: parseInt(el.getAttribute("data-repeat")) || 3
-                };
-                new ThunderText(el, options);
+        ctx.stroke();
+    }
+
+    startLightningEffect() {
+        setInterval(() => {
+            this.drawLightning();
+            gsap.to(this.element, {
+                textShadow: `0 0 ${this.options.intensity * 2}px ${this.options.color}, 0 0 ${this.options.intensity * 3}px ${this.options.color}`,
+                duration: 0.05
             });
+            setTimeout(() => {
+                gsap.to(this.element, {
+                    textShadow: `0 0 ${this.options.intensity}px ${this.options.color}`,
+                    duration: 0.1
+                });
+            }, 100);
+        }, this.options.interval);
+    }
+}
+
+// Initialize for all elements with class 'thunder-text'
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".thunder-text").forEach(el => {
+        new ThunderText(el, {
+            color: el.getAttribute("data-color") || "aqua",
+            intensity: parseInt(el.getAttribute("data-intensity")) || 50,
+            flashOpacity: parseFloat(el.getAttribute("data-flash-opacity")) || 0.9,
+            interval: parseInt(el.getAttribute("data-interval")) || 3000,
+            repeat: parseInt(el.getAttribute("data-repeat")) || 3
         });
-    </script>
-</body>
-</html>
+    });
+});
+
+// CSS animation for flickering effect
+document.head.insertAdjacentHTML("beforeend", `
+<style>
+@keyframes flicker {
+    0% { opacity: 1; }
+    50% { opacity: 0.8; }
+    100% { opacity: 1; }
+}
+</style>
+`);
