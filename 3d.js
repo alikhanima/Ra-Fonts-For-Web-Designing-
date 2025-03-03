@@ -7,7 +7,7 @@
         <style>
           :host {
             display: inline-block;
-            perspective: 1000px; 
+            perspective: 500px;
             transform-style: preserve-3d;
           }
 
@@ -18,20 +18,15 @@
             font-weight: inherit;
             color: inherit;
             text-transform: inherit;
-            transition: transform 0.2s ease; 
-          }
-
-          :host(:hover) .text {
-            transform: rotateY(15deg); 
           }
 
           .front {
-            transform: translateZ(10px); 
+            transform: translateZ(5px);
           }
 
           .back {
-            transform: translateZ(-10px);
-            color: rgba(0, 0, 0, 0.7); 
+            transform: translateZ(-5px);
+            color: rgba(0, 0, 0, 0.5);
           }
 
           .front, .back {
@@ -42,11 +37,6 @@
             justify-content: center;
             align-items: center;
             white-space: nowrap;
-          }
-
-          @keyframes rotate {
-            from { transform: rotateY(0deg); }
-            to { transform: rotateY(360deg); }
           }
         </style>
         <div class="text">
@@ -60,11 +50,7 @@
       const textContent = this.textContent;
       this.shadowRoot.querySelector('.front').textContent = textContent;
       this.shadowRoot.querySelector('.back').textContent = textContent;
-      this.textContent = '';
-
-      setTimeout(() => {
-        this.shadowRoot.querySelector('.text').style.animation = 'rotate 3s linear infinite';
-      }, 100);
+      this.textContent = ''; // Clear original text
     }
   }
 
