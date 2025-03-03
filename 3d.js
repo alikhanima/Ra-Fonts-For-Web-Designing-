@@ -1,16 +1,5 @@
 // text-animations.js
 (function () {
-  // Define 3D Rotation Effect
-  const apply3DEffect = (element) => {
-    element.style.display = "inline-block";
-    element.style.animation = "rotate3d 5s infinite ease-in-out";
-  };
-
-  // Define Color-Changing Effect
-  const applyColorChangingEffect = (element) => {
-    element.style.animation = "colorChange 3s infinite";
-  };
-
   // Add CSS Keyframes dynamically
   const styleSheet = document.createElement("style");
   styleSheet.innerHTML = `
@@ -31,12 +20,15 @@
   `;
   document.head.appendChild(styleSheet);
 
-  // Apply effects to custom tags
+  // Apply 3D Effect to <3d> tags
   document.querySelectorAll("3d").forEach((element) => {
-    apply3DEffect(element);
+    element.style.display = "inline-block";
+    element.style.animation = "rotate3d 5s infinite ease-in-out";
   });
 
+  // Apply Color-Changing Effect to <color-changing> tags
   document.querySelectorAll("color-changing").forEach((element) => {
-    applyColorChangingEffect(element);
+    element.style.display = "inline-block";
+    element.style.animation = "colorChange 3s infinite";
   });
 })();
