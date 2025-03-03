@@ -5,13 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thunder Text Effect Demo</title>
     
-    <!-- Include Thunder Text Component -->
-    <script src="https://cdn.jsdelivr.net/gh/alikhanima/Ra-Fonts-For-Web-Designing-@refs/heads/main/thunder-text.js"></script>
-    
-    <!-- Required GSAP dependencies -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Physics2DPlugin.min.js"></script>
-    
     <style>
         body {
             background-color: black;
@@ -33,5 +26,28 @@
     <h2 class="thunder-text" data-color="cyan" data-intensity="40" data-flash-opacity="0.7" data-interval="4000" data-repeat="4">
         THUNDER POWER
     </h2>
+    
+    <!-- Required GSAP dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Physics2DPlugin.min.js"></script>
+    
+    <!-- Include Thunder Text Component -->
+    <script src="https://cdn.jsdelivr.net/gh/alikhanima/Ra-Fonts-For-Web-Designing-@refs/heads/main/thunder-text.js"></script>
+    
+    <!-- Ensure script runs after DOM load -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            document.querySelectorAll(".thunder-text").forEach(el => {
+                const options = {
+                    color: el.getAttribute("data-color") || "white",
+                    intensity: parseInt(el.getAttribute("data-intensity")) || 30,
+                    flashOpacity: parseFloat(el.getAttribute("data-flash-opacity")) || 0.9,
+                    interval: parseInt(el.getAttribute("data-interval")) || 3000,
+                    repeat: parseInt(el.getAttribute("data-repeat")) || 3
+                };
+                new ThunderText(el, options);
+            });
+        });
+    </script>
 </body>
 </html>
