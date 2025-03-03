@@ -1,108 +1,71 @@
+// thunder-text.js
 class ThunderText {
-    constructor(element) {
+    constructor(element, options = {}) {
         this.element = element;
-        this.particles = [];
-        this.init();
+        this.options = Object.assign({
+            color: "white",
+            intensity: 30,
+            flashOpacity: 0.9,
+            interval: 3000,
+            repeat: 3
+        }, options);
+        
+        this.flash = document.createElement("div");
+        this.flash.classList.add("thunder-flash");
+        this.element.parentElement.appendChild(this.flash);
+        this.initStyles();
+        this.bindEvents();
     }
 
-    init() {
-        this.config = {
-            color: this.element.dataset.color || '#00f7ff', // Default color for text
-            intensity: parseFloat(this.element.dataset.intensity) || 1,
-            glowIntensity: parseFloat(this.element.dataset.glowIntensity) || 2, // Increased glow intensity
-            shadowBlur: this.element.dataset.shadowBlur || '50px', // Increased blur for better glow effect
-            particleSize: this.element.dataset.particleSize || '6px',
-            animationSpeed: parseFloat(this.element.dataset.animationSpeed) || 0.5,
-            interval: 2000
-        };
-
-        // Apply the color directly to the text
-        this.element.style.color = this.config.color;
-
-        // Apply the neon glow effect to text using text-shadow
-        this.element.style.textShadow = `0 0 ${this.config.shadowBlur} rgba(0, 247, 255, ${this.config.glowIntensity}), 0 0 ${parseInt(this.config.shadowBlur) * 0.8}px rgba(0, 247, 255, ${this.config.glowIntensity * 0.7})`;
-
-        this.element.style.setProperty('--thunder-color', this.config.color);
-        this.element.style.setProperty('--glow-intensity', this.config.glowIntensity);
-        this.element.style.setProperty('--shadow-blur', this.config.shadowBlur);
-        this.element.style.setProperty('--particle-size', this.config.particleSize);
-        this.element.style.setProperty('--animation-speed', this.config.animationSpeed);
-
-        this.createParticles();
-        this.animateText();
-        this.setupHover();
+    initStyles() {
+        this.element.style.position = "relative";
+        this.element.style.fontWeight = "bold";
+        this.element.style.textTransform = "uppercase";
+        this.element.style.color = this.options.color;
+        this.flash.style.position = "absolute";
+        this.flash.style.top = "50%";
+        this.flash.style.left = "50%";
+        this.flash.style.width = "100%";
+        this.flash.style.height = "100%";
+        this.flash.style.background = `rgba(255, 255, 255, ${this.options.flashOpacity})`;
+        this.flash.style.opacity = "0";
+        this.flash.style.transform = "translate(-50%, -50%)";
     }
 
-    createParticles() {
-        const particleCount = 100 * this.config.intensity;
-        for (let i = 0; i < particleCount; i++) {
-            const particle = document.createElement('div');
-            particle.className = 'thunder-particle';
-            this.element.appendChild(particle);
-            this.particles.push(particle);
+    bindEvents() {
+        if (this.options.interval > 0) {
+            setInterval(() => this.triggerEffect(), this.options.interval);
         }
+        this.element.addEventListener("mouseenter", () => this.triggerEffect());
     }
 
-    animateText() {
-        const text = this.element.innerText;
-        this.element.innerHTML = text.split('').map(c =>
-            `<span>${c}</span>`
-        ).join('');
-
-        gsap.to(this.element.children, {
-            y: () => Math.random() * 10 - 5,
-            duration: this.config.animationSpeed,
-            repeat: -1,
+    triggerEffect() {
+        gsap.to(this.flash, {
+            opacity: 1,
+            duration: 0.1,
+            repeat: this.options.repeat,
+            yoyo: true,
+            onComplete: () => gsap.to(this.flash, { opacity: 0, duration: 0.1 })
+        });
+        gsap.to(this.element, {
+            textShadow: `0 0 ${this.options.intensity}px rgba(255, 255, 255, 0.8)`,
+            duration: 0.1,
+            repeat: this.options.repeat,
             yoyo: true
         });
     }
-
-    setupHover() {
-        this.element.addEventListener('mouseenter', () => this.thunderStrike());
-        setInterval(() => this.thunderStrike(), this.config.interval);
-    }
-
-    thunderStrike() {
-        this.particles.forEach(particle => {
-            const rect = this.element.getBoundingClientRect();
-            const intensity = this.config.intensity;
-
-            gsap.set(particle, {
-                x: rect.left + Math.random() * rect.width,
-                y: rect.top + Math.random() * rect.height,
-                opacity: 1,
-                scale: 0
-            });
-
-            gsap.to(particle, {
-                duration: 0.8 * intensity,
-                physics2D: {
-                    velocity: 150 + Math.random() * 100 * intensity,
-                    angle: Math.random() * 360,
-                    gravity: 0.3
-                },
-                opacity: 0,
-                scale: 1.5,
-                ease: "power3.out"
-            });
-        });
-
-        gsap.to(this.element, {
-            duration: 0.2,
-            textShadow: `0 0 ${parseInt(this.config.shadowBlur) * 2}px rgba(0, 247, 255, ${this.config.glowIntensity}), 0 0 ${parseInt(this.config.shadowBlur) * 1.5}px rgba(0, 247, 255, ${this.config.glowIntensity - 0.2})`,
-            boxShadow: `0 0 ${parseInt(this.config.shadowBlur) * 2}px rgba(0, 247, 255, ${this.config.glowIntensity})`
-        });
-
-        setTimeout(() => {
-            gsap.to(this.element, {
-                duration: 0.5,
-                textShadow: `0 0 ${this.config.shadowBlur} rgba(0, 247, 255, 0.8), 0 0 ${parseInt(this.config.shadowBlur) * 0.7}px rgba(0, 247, 255, 0.6)`,
-                boxShadow: `0 0 ${parseInt(this.config.shadowBlur)}px rgba(0, 247, 255, 0.6)`
-            });
-        }, 500);
-    }
 }
 
-document.querySelectorAll('.thunder-text').forEach(el => {
-    new ThunderText(el);
+// Automatically apply effect to elements with class "thunder-text"
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll(".thunder-text").forEach(el => {
+        const options = {
+            color: el.getAttribute("data-color") || "white",
+            intensity: parseInt(el.getAttribute("data-intensity")) || 30,
+            flashOpacity: parseFloat(el.getAttribute("data-flash-opacity")) || 0.9,
+            interval: parseInt(el.getAttribute("data-interval")) || 3000,
+            repeat: parseInt(el.getAttribute("data-repeat")) || 3
+        };
+        new ThunderText(el, options);
+    });
 });
