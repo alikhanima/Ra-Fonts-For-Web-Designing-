@@ -1,86 +1,70 @@
-class ThunderText {
-    constructor() {
-        this.applyEffects();
-        this.observeChanges();
-    }
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("[text-effect]").forEach(el => {
+        const effectType = el.getAttribute("text-effect");
+        const textColor = el.getAttribute("color") || "white";
+        const glowColor = el.getAttribute("glow") || textColor;
+        const flicker = el.hasAttribute("flicker");
+        const lightning = el.hasAttribute("lightning");
 
-    applyEffects() {
-        document.querySelectorAll('[text-effect="glow"]').forEach(el => {
-            const color = el.getAttribute('color') || 'white';
-            const glow = el.getAttribute('glow') || color;
-            const flicker = el.hasAttribute('flicker');
-            const lightning = el.hasAttribute('lightning');
+        // Apply styles
+        el.style.position = "relative";
+        el.style.display = "inline-block";
+        el.style.color = textColor;
+        el.style.textShadow = `
+            0 0 5px ${glowColor},
+            0 0 10px ${glowColor},
+            0 0 20px ${glowColor}
+        `;
 
-            el.style.color = color;
-            el.style.textShadow = `
-                0 0 10px ${glow}, 
-                0 0 20px ${glow}, 
-                0 0 40px ${glow}
-            `;
+        // Add flickering effect using GSAP
+        if (flicker && typeof gsap !== "undefined") {
+            gsap.to(el, {
+                opacity: 1,
+                repeat: -1,
+                yoyo: true,
+                duration: 0.08,
+                ease: "power1.inOut",
+                opacity: () => Math.random() * 0.3 + 0.7
+            });
+        }
 
-            if (flicker) this.flickerEffect(el);
-            if (lightning) this.addLightningEffect(el);
-        });
-    }
+        // Add a lightning effect (optional)
+        if (lightning) {
+            const canvas = document.createElement("canvas");
+            canvas.style.position = "absolute";
+            canvas.style.top = "0";
+            canvas.style.left = "0";
+            canvas.style.pointerEvents = "none";
+            el.appendChild(canvas);
+            const ctx = canvas.getContext("2d");
 
-    flickerEffect(el) {
-        gsap.to(el, {
-            opacity: 0.9,
-            duration: 0.1,
-            repeat: -1,
-            yoyo: true,
-            ease: "power1.inOut"
-        });
-    }
+            function resizeCanvas() {
+                canvas.width = el.clientWidth;
+                canvas.height = el.clientHeight;
+            }
+            resizeCanvas();
+            window.addEventListener("resize", resizeCanvas);
 
-    addLightningEffect(el) {
-        const canvas = document.createElement('canvas');
-        canvas.style.position = 'absolute';
-        canvas.style.top = '0';
-        canvas.style.left = '0';
-        canvas.style.pointerEvents = 'none';
-        el.style.position = 'relative';
-        el.appendChild(canvas);
-
-        const ctx = canvas.getContext('2d');
-
-        const drawLightning = () => {
-            const { width, height } = el.getBoundingClientRect();
-            canvas.width = width;
-            canvas.height = height;
-            ctx.clearRect(0, 0, width, height);
-
-            for (let i = 0; i < 3; i++) {
+            function drawLightning() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.beginPath();
-                ctx.moveTo(Math.random() * width, 0);
-                for (let j = 0; j < 5; j++) {
-                    ctx.lineTo(Math.random() * width, (j / 5) * height);
+                let x = Math.random() * canvas.width;
+                let y = 0;
+                ctx.moveTo(x, y);
+                for (let i = 0; i < 4; i++) {
+                    x += (Math.random() - 0.5) * canvas.width * 0.5;
+                    y += canvas.height / 4;
+                    ctx.lineTo(x, y);
                 }
-                ctx.strokeStyle = "rgba(255, 255, 255, 0.8)";
+                ctx.strokeStyle = glowColor;
                 ctx.lineWidth = 2;
-                ctx.shadowColor = "white";
+                ctx.shadowColor = glowColor;
                 ctx.shadowBlur = 10;
                 ctx.stroke();
+                setTimeout(() => ctx.clearRect(0, 0, canvas.width, canvas.height), 80);
             }
-            setTimeout(() => { canvas.style.opacity = "0"; }, 50);
-        };
 
-        setInterval(() => {
-            canvas.style.opacity = "1";
-            drawLightning();
-        }, 3000);
-    }
-
-    observeChanges() {
-        const observer = new MutationObserver(() => this.applyEffects());
-        observer.observe(document.body, { childList: true, subtree: true });
-    }
-}
-
-// ✅ Load GSAP for animations
-const gsapScript = document.createElement('script');
-gsapScript.src = "https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js";
-gsapScript.onload = () => {
-    document.addEventListener('DOMContentLoaded', () => new ThunderText());
-};
-document.head.appendChild(gsapScript);
+            setInterval(drawLightning, 2000 + Math.random() * 3000);
+        }
+    });
+});
