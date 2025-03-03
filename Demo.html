@@ -1,101 +1,153 @@
+// thunder-text.js
 class ThunderText {
-    constructor(element, options = {}) {
-        this.element = element;
-        this.options = {
-            color: options.color || 'aqua',
-            intensity: options.intensity || 50,
-            flashOpacity: options.flashOpacity || 0.9,
-            interval: options.interval || 3000,
-            repeat: options.repeat || 3
-        };
-        
-        this.initEffect();
+  constructor(element, options = {}) {
+    this.element = element;
+    // Merge default options with user-provided options
+    this.options = Object.assign({
+      color: 'aqua',
+      intensity: 60,       // Base glow strength
+      interval: 2000,      // Time (ms) between lightning strikes
+      arcsPerStrike: 3,    // Number of arcs each time lightning strikes
+      arcSegments: 4,      // How many segments in each arc
+      flickerDuration: 0.1 // Flicker speed
+    }, options);
+
+    // Set up text styling
+    this.setupTextStyling();
+    // Create a canvas overlay for drawing lightning arcs
+    this.setupCanvas();
+    // Start the random lightning effect
+    this.startLightning();
+  }
+
+  setupTextStyling() {
+    const { color, intensity } = this.options;
+    // Position relative to overlay canvas
+    this.element.style.position = 'relative';
+    this.element.style.display = 'inline-block';
+    this.element.style.color = '#fff';
+    this.element.style.textShadow = `
+      0 0 ${intensity * 0.3}px ${color},
+      0 0 ${intensity * 0.6}px ${color},
+      0 0 ${intensity * 1.2}px ${color}
+    `;
+    // Optional flicker animation in CSS
+    const flickerKeyframes = `
+      @keyframes thunderFlicker {
+        0%, 100%   { opacity: 1; }
+        45%        { opacity: 0.95; }
+        46%        { opacity: 0.5; }
+        47%        { opacity: 0.8; }
+        48%        { opacity: 1; }
+        49%        { opacity: 0.9; }
+      }
+    `;
+    const styleTag = document.createElement('style');
+    styleTag.innerHTML = flickerKeyframes;
+    document.head.appendChild(styleTag);
+    // Apply flicker
+    this.element.style.animation = `thunderFlicker ${this.options.flickerDuration + 1}s infinite`;
+  }
+
+  setupCanvas() {
+    // Create canvas overlay for arcs
+    this.canvas = document.createElement('canvas');
+    this.ctx = this.canvas.getContext('2d');
+    this.canvas.style.position = 'absolute';
+    this.canvas.style.top = '0';
+    this.canvas.style.left = '0';
+    this.canvas.style.pointerEvents = 'none';
+
+    // Insert canvas into the text element
+    this.element.appendChild(this.canvas);
+
+    // Update canvas size to match the text element
+    this.updateCanvasSize();
+    // Re-size on window changes
+    window.addEventListener('resize', () => this.updateCanvasSize());
+  }
+
+  updateCanvasSize() {
+    // Match the canvas to the bounding box of the text
+    const rect = this.element.getBoundingClientRect();
+    this.canvas.width = rect.width;
+    this.canvas.height = rect.height;
+  }
+
+  drawLightningArc() {
+    const { color, arcSegments } = this.options;
+    const { width, height } = this.canvas;
+    // Start from a random top edge position
+    let x = Math.random() * width;
+    let y = 0;
+
+    this.ctx.beginPath();
+    this.ctx.moveTo(x, y);
+    // Each segment goes further down, random horizontal shift
+    for (let i = 0; i < arcSegments; i++) {
+      x += (Math.random() - 0.5) * (width * 0.3); // random horizontal shift
+      y += height / arcSegments;                 // move down evenly
+      this.ctx.lineTo(x, y);
+    }
+    this.ctx.strokeStyle = color;
+    this.ctx.lineWidth = Math.random() * 2 + 1;
+    this.ctx.shadowColor = color;
+    this.ctx.shadowBlur = 15;
+    this.ctx.stroke();
+  }
+
+  lightningStrike() {
+    const { arcsPerStrike } = this.options;
+    // Clear previous arcs
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    // Draw multiple arcs for a single strike
+    for (let i = 0; i < arcsPerStrike; i++) {
+      this.drawLightningArc();
     }
 
-    initEffect() {
-        const el = this.element;
-        const options = this.options;
-        el.style.position = "relative";
-        el.style.transition = "color 0.1s ease-in-out";
-        el.style.textShadow = `0 0 ${options.intensity}px ${options.color}, 0 0 ${options.intensity * 2}px ${options.color}`;
-        el.style.animation = "flicker 2s infinite";
-
-        // Create canvas for electric sparks
-        const canvas = document.createElement("canvas");
-        canvas.style.position = "absolute";
-        canvas.style.top = "0";
-        canvas.style.left = "0";
-        canvas.style.width = "100%";
-        canvas.style.height = "100%";
-        canvas.style.pointerEvents = "none";
-        el.appendChild(canvas);
-        this.canvas = canvas;
-        this.ctx = canvas.getContext("2d");
-        
-        window.addEventListener("resize", () => this.updateCanvasSize());
-        this.updateCanvasSize();
-        this.startLightningEffect();
-    }
-
-    updateCanvasSize() {
-        this.canvas.width = this.element.offsetWidth;
-        this.canvas.height = this.element.offsetHeight;
-    }
-
-    drawLightning() {
-        const ctx = this.ctx;
-        ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        const x = Math.random() * this.canvas.width;
-        const y = 0;
-        ctx.strokeStyle = this.options.color;
-        ctx.lineWidth = Math.random() * 2 + 1;
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        for (let i = 0; i < 5; i++) {
-            const dx = x + (Math.random() - 0.5) * 20;
-            const dy = y + (Math.random() * this.canvas.height);
-            ctx.lineTo(dx, dy);
-        }
-        ctx.stroke();
-    }
-
-    startLightningEffect() {
-        setInterval(() => {
-            this.drawLightning();
-            gsap.to(this.element, {
-                textShadow: `0 0 ${this.options.intensity * 2}px ${this.options.color}, 0 0 ${this.options.intensity * 3}px ${this.options.color}`,
-                duration: 0.05
-            });
-            setTimeout(() => {
-                gsap.to(this.element, {
-                    textShadow: `0 0 ${this.options.intensity}px ${this.options.color}`,
-                    duration: 0.1
-                });
-            }, 100);
-        }, this.options.interval);
-    }
-}
-
-// Initialize for all elements with class 'thunder-text'
-document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll(".thunder-text").forEach(el => {
-        new ThunderText(el, {
-            color: el.getAttribute("data-color") || "aqua",
-            intensity: parseInt(el.getAttribute("data-intensity")) || 50,
-            flashOpacity: parseFloat(el.getAttribute("data-flash-opacity")) || 0.9,
-            interval: parseInt(el.getAttribute("data-interval")) || 3000,
-            repeat: parseInt(el.getAttribute("data-repeat")) || 3
+    // Small flash effect on text
+    gsap.to(this.element, {
+      duration: 0.1,
+      textShadow: `
+        0 0 ${this.options.intensity * 1.5}px ${this.options.color},
+        0 0 ${this.options.intensity * 2}px ${this.options.color}
+      `,
+      onComplete: () => {
+        // Return text glow to normal after short delay
+        gsap.to(this.element, {
+          duration: 0.2,
+          textShadow: `
+            0 0 ${this.options.intensity * 0.3}px ${this.options.color},
+            0 0 ${this.options.intensity * 0.6}px ${this.options.color},
+            0 0 ${this.options.intensity * 1.2}px ${this.options.color}
+          `
         });
+      }
     });
-});
+  }
 
-// CSS animation for flickering effect
-document.head.insertAdjacentHTML("beforeend", `
-<style>
-@keyframes flicker {
-    0% { opacity: 1; }
-    50% { opacity: 0.8; }
-    100% { opacity: 1; }
+  startLightning() {
+    this.lightningStrike(); // Fire once immediately
+    // Schedule repeated strikes
+    setInterval(() => {
+      // Clear arcs before each new strike
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      this.lightningStrike();
+    }, this.options.interval);
+  }
 }
-</style>
-`);
+
+// Auto-initialize for all elements with class 'thunder-text'
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.thunder-text').forEach(el => {
+    new ThunderText(el, {
+      color: el.getAttribute('data-color') || 'aqua',
+      intensity: parseInt(el.getAttribute('data-intensity')) || 60,
+      interval: parseInt(el.getAttribute('data-interval')) || 2000,
+      arcsPerStrike: parseInt(el.getAttribute('data-arcs')) || 3,
+      arcSegments: parseInt(el.getAttribute('data-segments')) || 4,
+      flickerDuration: parseFloat(el.getAttribute('data-flicker')) || 0.1
+    });
+  });
+});
