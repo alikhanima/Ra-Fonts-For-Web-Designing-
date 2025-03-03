@@ -1,40 +1,38 @@
 document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll("[text-effect]").forEach(el => {
-        const effectType = el.getAttribute("text-effect");
-        const textColor = el.getAttribute("color") || "white";
-        const glowColor = el.getAttribute("glow") || textColor;
-        const flicker = el.hasAttribute("flicker");
-        const lightning = el.hasAttribute("lightning");
+    const elements = document.querySelectorAll('[text-effect="glow"]');
+    elements.forEach(el => {
+        const textColor = el.getAttribute('color') || 'white';
+        const glowColor = el.getAttribute('glow') || textColor;
+        const flicker = el.hasAttribute('flicker');
+        const lightning = el.hasAttribute('lightning');
 
-        // Apply styles
+        // Apply base styles: text color and glow
         el.style.position = "relative";
         el.style.display = "inline-block";
         el.style.color = textColor;
-        el.style.textShadow = `
-            0 0 5px ${glowColor},
-            0 0 10px ${glowColor},
-            0 0 20px ${glowColor}
-        `;
+        el.style.textShadow = `0 0 5px ${glowColor}, 0 0 10px ${glowColor}, 0 0 20px ${glowColor}`;
 
-        // Add flickering effect using GSAP
+        // Flicker effect using GSAP (if enabled and GSAP is loaded)
         if (flicker && typeof gsap !== "undefined") {
             gsap.to(el, {
-                opacity: 1,
+                opacity: 0.7,
+                duration: 0.1,
                 repeat: -1,
                 yoyo: true,
-                duration: 0.08,
-                ease: "power1.inOut",
-                opacity: () => Math.random() * 0.3 + 0.7
+                ease: "power1.inOut"
             });
         }
 
-        // Add a lightning effect (optional)
+        // Lightning effect: create a canvas overlay for periodic lightning bolts
         if (lightning) {
             const canvas = document.createElement("canvas");
             canvas.style.position = "absolute";
             canvas.style.top = "0";
             canvas.style.left = "0";
+            canvas.style.width = "100%";
+            canvas.style.height = "100%";
             canvas.style.pointerEvents = "none";
+            canvas.style.zIndex = "1";
             el.appendChild(canvas);
             const ctx = canvas.getContext("2d");
 
@@ -51,9 +49,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 let x = Math.random() * canvas.width;
                 let y = 0;
                 ctx.moveTo(x, y);
-                for (let i = 0; i < 4; i++) {
+                // Create 5 segments for a jagged bolt
+                for (let i = 0; i < 5; i++) {
                     x += (Math.random() - 0.5) * canvas.width * 0.5;
-                    y += canvas.height / 4;
+                    y += canvas.height / 5;
                     ctx.lineTo(x, y);
                 }
                 ctx.strokeStyle = glowColor;
@@ -61,10 +60,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 ctx.shadowColor = glowColor;
                 ctx.shadowBlur = 10;
                 ctx.stroke();
-                setTimeout(() => ctx.clearRect(0, 0, canvas.width, canvas.height), 80);
+                // Erase the bolt after 100ms
+                setTimeout(() => { ctx.clearRect(0, 0, canvas.width, canvas.height); }, 100);
             }
-
-            setInterval(drawLightning, 2000 + Math.random() * 3000);
+            // Draw lightning every 2000ms
+            setInterval(drawLightning, 2000);
         }
     });
 });
