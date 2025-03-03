@@ -1,3 +1,4 @@
+// test
 function applyGlowEffect() {
     const glowingElements = document.querySelectorAll('[data-glow]');
 
