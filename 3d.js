@@ -1,34 +1,57 @@
-// text-animations.js
-(function () {
-  // Add CSS Keyframes dynamically
-  const styleSheet = document.createElement("style");
-  styleSheet.innerHTML = `
-    @keyframes rotate3d {
-      0% { transform: rotateY(0deg) scale(1); }
-      25% { transform: rotateY(90deg) scale(1.2); }
-      50% { transform: rotateY(180deg) scale(1); }
-      75% { transform: rotateY(270deg) scale(1.2); }
-      100% { transform: rotateY(360deg) scale(1); }
-    }
-    @keyframes colorChange {
-      0% { color: #ff6f61; }
-      25% { color: #6b5b95; }
-      50% { color: #88b04b; }
-      75% { color: #f7cac9; }
-      100% { color: #ff6f61; }
-    }
-  `;
-  document.head.appendChild(styleSheet);
+(function() {
+  class ThreeDText extends HTMLElement {
+    constructor() {
+      super();
+      this.attachShadow({ mode: 'open' });
+      this.shadowRoot.innerHTML = `
+        <style>
+          :host {
+            display: inline-block;
+            transform-style: preserve-3d;
+          }
 
-  // Apply 3D Effect to <3d> tags
-  document.querySelectorAll("3d").forEach((element) => {
-    element.style.display = "inline-block";
-    element.style.animation = "rotate3d 5s infinite ease-in-out";
-  });
+          .text {
+            position: relative;
+            transform-style: preserve-3d;
+            font-size: inherit; /* Inherit font size from parent */
+            font-weight: inherit; /* Inherit font weight */
+            color: inherit; /* Inherit color */
+            text-transform: inherit; /* Inherit text transform */
+          }
 
-  // Apply Color-Changing Effect to <color-changing> tags
-  document.querySelectorAll("color-changing").forEach((element) => {
-    element.style.display = "inline-block";
-    element.style.animation = "colorChange 3s infinite";
-  });
+          .front {
+            transform: translateZ(20px);
+          }
+
+          .back {
+            transform: translateZ(-20px);
+            color: rgba(0, 0, 0, 0.5); /* Darker back */
+          }
+
+          .front, .back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            white-space: nowrap; /* Prevent text wrapping */
+          }
+        </style>
+        <div class="text">
+          <div class="front"></div>
+          <div class="back"></div>
+        </div>
+      `;
+    }
+
+    connectedCallback() {
+      const textContent = this.textContent;
+      this.shadowRoot.querySelector('.front').textContent = textContent;
+      this.shadowRoot.querySelector('.back').textContent = textContent;
+      this.textContent = ''; // Clear original text
+    }
+  }
+
+  customElements.define('3d', ThreeDText);
 })();
